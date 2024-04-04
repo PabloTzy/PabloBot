@@ -8,17 +8,17 @@ const fs = require('fs')
 const chalk = require('chalk')
 
 //—————「 Set Host Untuk Koneksi ke Server WL 」—————//
-global.host = 'theta.optiklink.com' // HOST SFTP
-global.port = '2022' // PORT SFTP
-global.username = '9l7s1swp.860e41b8' //USERNAME SFTP
-global.password = 'ZfgPMIM1zgnw' //PASSWORD SFTP
+global.host = 'HOST_SFTP_LU' // HOST SFTP
+global.port = 'PORT_SFTP_LJ' // PORT SFTP
+global.username = 'USERNAME' //USERNAME SFTP
+global.password = 'PASSWORD' //PASSWORD SFTP
 global.sftppath = '/scriptfiles/whitelist/' //UBAH MENJADI PATH TEMPAT FILE WHITELIST KALIAN BERADA
 
 //—————「 Setting Samp Query 」—————//
-global.IpServer = '104.167.222.158' //UBAH MENJADI IP SERVER KALIAN
-global.PortServer = '3835' // UBAH MENJADI PORT SERVER KALIAN
-global.NameServerLite = 'ALRP' // UBAH MENJADI NAMA SINGKATAN SERVER RP KALIAN CONTOH ALVEOULUS ROLEPLAY JADI ALRP
-global.NameServerFull = 'Alveolus Roleplay' // UBAH MENJADI NAMA SERVER KALIAN
+global.IpServer = 'IP_SERVER_LU' //UBAH MENJADI IP SERVER KALIAN
+global.PortServer = 'PORT_SERVER_LU' // UBAH MENJADI PORT SERVER KALIAN
+global.NameServerLite = 'SINGKATAN_NAMA_SERVER_LU' // UBAH MENJADI NAMA SINGKATAN SERVER RP KALIAN CONTOH ALVEOULUS ROLEPLAY JADI ALRP
+global.NameServerFull = 'NAMA_SERVER_LU' // UBAH MENJADI NAMA SERVER KALIAN
 
 //—————「 Setting Bot 」—————//
 global.owner = "6285755251934"
@@ -65,10 +65,10 @@ const mess = {
        fitur: "Mohon Maaf Kak Fitur Eror Silahkan Chat Developer Bot Agar Bisa Segera Diperbaiki",
    },
    only: {
-       group: "Fitur Nya Cuman Bisa Di Dalem Grup Yah Bang LANZZOFFC",
+       group: "Fitur Nya Cuman Bisa Di Dalem Grup Yah Bang",
        private: "Di Chat Pribadi Bang Raihan Art Biar Bisa Di Pake",
-       owner: "Ga Usah Pake Fitur Ini Asu Lu Bukan Bang HADZOFFC",
-       admin: "Ga Usah Pake Fitur Ini Asu Lu Bukan Bang HADZOFFC",
+       owner: "Ga Usah Pake Fitur Ini Asu",
+       admin: "Ga Usah Pake Fitur Ini Asu",
        badmin: "Maaf Kak Kaya Nya Kakak Tidak Bisa Menggunakan Fitur Ini Di Karenakan Bot Bukan Admin Group",
        premium: "Maaf Kamu Belum Jadi User Premium Untuk Menjadi User Premium Silahkan Beli Ke Owner Dengan Cara Ketik .owner",
    }
