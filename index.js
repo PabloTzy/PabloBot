@@ -5,6 +5,7 @@ CREACOT : PABLO × ZYREX
 
 */
 require('./setting')
+require('./pablo')
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, generateForwardMessageContent, prepareWAMessageMedia, generateWAMessageFromContent, generateMessageID, downloadContentFromMessage, makeInMemoryStore, jidDecode, getAggregateVotesInPollMessage, proto } = require("@whiskeysockets/baileys")
 const fs = require('fs')
 const pino = require('pino')
@@ -28,7 +29,18 @@ output: process.stdout
   return new Promise((resolve) => {
 rl.question(text, resolve)
   })
-};
+}
+const { color, bgcolor } = require('./all/color')
+let d = new Date
+let locale = 'id'
+let gmt = new Date(0).getTime() - new Date('1 Januari 2021').getTime()
+let weton = ['Pahing', 'Pon','Wage','Kliwon','Legi'][Math.floor(((d * 1) + gmt) / 84600000) % 5]
+let week = d.toLocaleDateString(locale, { weekday: 'long' })
+const calender = d.toLocaleDateString("id", {
+day: 'numeric',
+month: 'long',
+year: 'numeric'
+})
 //=================================================//
 var low
 try {
@@ -79,9 +91,10 @@ auth: state,
 browser: ['Chrome (Linux)', '', '']
 });
 if(usePairingCode && !haikal.authState.creds.registered) {
-		const phoneNumber = await question('MASUKAN NOMOR DENGAN AWALAN 62:\n');
+    console.log(color(`INFO:`, "red"), color(`\n𖦹`, "yellow"), color(`Jika code tidak muncul enter 1-2x lagi`, "green"), color(`\n𖦹`, "yellow"), color(`Type nomor harus 62xxx bukan 08xxx\n`, "green"))
+		const phoneNumber = await question(color('\n\n\nSilahkan masukin nomor Whatsapp Awali dengan 62:\n', 'magenta'));
 		const code = await haikal.requestPairingCode(phoneNumber.trim())
-		console.log(`Pairing code: ${code}`)
+		console.log(color(`⚠︎ Kode Pairing Bot Whatsapp kamu :`,"gold"), color(`${code}`, "white"))
 
 	}
 //=================================================//
@@ -331,10 +344,24 @@ connectToWhatsApp();
 console.log(`Unknown DisconnectReason: ${reason}|${connection}`);
 connectToWhatsApp();
   }
+} else if (connection === 'connecting') {
+    //console.log(`${color(`[`,`white`)+color(`1`,`red`)+color(`]`,`white`)}`,`WA v${version.join('.')}`)
+    //await sleep(400) 
+  console.log(`${color(`[`,`white`)+color(`1`,`red`)+color(`]`,`white`)}`,`${calender}`)
+    //await sleep(400) 
+  console.log(`${color(`[`,`white`)+color(`2`,`red`)+color(`]`,`white`)}`,`Base Sc: PabloNetwork`)
+    //await sleep(400)  
+  console.log(`${color(`[`,`white`)+color(`3`,`red`)+color(`]`,`white`)}`,"Connected To Server") 
+    //await sleep(400)  
+  console.log(color(`─[`,`magenta`),`「`,  color(`PabloNetwork x ZyrexOfc`,`red`), `」`,  color(`]─`,`magenta`))
+    //await sleep(400)  
+  
 } else if (connection === "open") {
-  haikal.sendMessage('62857552519341' + "@s.whatsapp.net", { text: `BOT STARTED!` });
-}
+      console.log(color(`[■■■■■■■■■■■■■■■] Connected`,`green`))
+      haikal.sendMessage('62857552519341' + "@s.whatsapp.net", { text: `BOT STARTED!` });
+
 // console.log('Connected...', update)
+}
 });
 return haikal
 }

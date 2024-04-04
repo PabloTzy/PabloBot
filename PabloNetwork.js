@@ -72,7 +72,7 @@ const hariini = moment.tz("Asia/Jakarta").format("dddd, DD MMMM YYYY");
 const antilink = JSON.parse(fs.readFileSync('./all/antilink.json'));
 const pler = JSON.parse(fs.readFileSync('./all/database/idgrup.json').toString())
 const jangan = m.isGroup ? pler.includes(m.chat) : false
-
+ 
 // Auto Blocked Nomor +212
 if (m.sender.startsWith('212')) return haikal.updateBlockStatus(m.sender, 'block')
 
@@ -162,7 +162,7 @@ if (m.isGroup && isBotAdmins && !m.key.fromMe && antilink) {
     }, 2000)
   }
 }
-
+ 
 switch (command) {
 // CASE CREATED BY PABLO
           // JANGAN MENGUBAH KALAU TIDAK PAHAM
@@ -433,7 +433,7 @@ switch (command) {
 │ *𝚄𝙿𝚃𝙸𝙼𝙴* : ${uptimeText}
 │ *𝙼𝙾𝙳𝙴* : ${mode}
 │ *𝚃𝚈𝙿𝙴* : NodeJs
-│ *𝚄𝙿𝙳𝙰𝚃𝙴* : V3✔︎
+│ *𝚄𝙿𝙳𝙰𝚃𝙴* : V4✔︎
 ├──────────────────ఌ︎
 ╰─── 『 *PabloNetwork∘₊✧*』 ────ఌ︎
 
@@ -713,6 +713,1520 @@ ${uptimeText}
     }
     break;
     
+case 'play':
+          case 'song': {
+        const { search } = require('yt-search');
+        const YoutubeMp3Downloader = require('youtube-mp3-downloader');
+        const fs = require('fs');
+
+        const keyword = args.join(' ');
+
+        reply('Mencari judul video...');
+
+        search(keyword, async (err, result) => {
+            if (err) {
+                console.error('Error searching video:', err);
+                return reply('Terjadi kesalahan saat mencari video.');
+            }
+            if (!result || !result.videos || result.videos.length === 0) {
+                return reply('Video tidak ditemukan.');
+            }
+
+            const video = result.videos[0];
+            console.log('Video ditemukan:', video.title);
+            reply(`Judul video ditemukan: ${video.title}`);
+
+            try {
+                const { videoId, title, thumbnail } = video;
+
+                const YD = new YoutubeMp3Downloader({
+                    "outputPath": "./mp3",                   // Output file location
+                
+                    "queueParallelism": 2,                  // Download parallelism
+                                // Interval in ms for the progress reports
+                    "allowWebm": false                      // Enable download from WebM sources
+                });
+
+                // Cek apakah file sudah ada di folder mp3
+                const fileName = `${video.title}.mp3`;
+                const filePath = `./mp3/${fileName}`;
+                if (fs.existsSync(filePath)) {
+                    // Jika file sudah ada, kirim langsung
+                    const audioBuffer = fs.readFileSync(filePath);
+
+                  
+                    haikal.sendMessage(m.chat, {
+                        audio: audioBuffer,
+                        fileName: fileName,
+                        mimetype: 'audio/mp4',
+                  ptt: true,
+
+                  contextInfo: {
+                          externalAdReply: {
+                              title,
+                              body: botname,
+                              mediaType: 2
+                          }
+                      }
+                  }).catch((err) => {
+                      console.error('Error mengirim pesan:', err);
+                      reply('Terjadi kesalahan saat mengirim pesan.');
+                  });
+                } else {
+                    // Jika file belum ada, download
+                    reply('Mendownload audio...');
+                    YD.download(videoId);
+
+                    YD.on("progress", function(progress) {
+                        if (progress.percentage === 1) {
+                            reply('Download telah dimulai.');
+                        } else if (progress.percentage === 50) {
+                            reply('Download mencapai 50%.');
+                        } else if (progress.percentage === 100) {
+                            reply('Download telah selesai.');
+                        }
+                        console.log("Progress:", progress);
+                    });
+                    reply(`Download Started`)
+
+                    YD.on("finished", function(err, data) {
+                        console.log("Download selesai:", data);
+                        reply(`${thumbnail}`)
+                        reply('Download Succesfully')
+
+                        const audioBuffer = fs.readFileSync(data.file);
+                        
+
+                        haikal.sendMessage(m.chat, {
+                            audio: audioBuffer,
+                            fileName: fileName, // Gunakan nama file yang baru dibuat
+                            mimetype: 'audio/mp4',
+                  ptt: true,
+
+                  contextInfo: {
+                          externalAdReply: {
+                              title,
+                              body: botname,
+                              mediaType: 2,
+                              mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                              thumbnail: {
+                                   thumbnail // Sertakan thumbnail dalam bentuk objek thumbnail
+                              }
+                          }
+                      }
+                  }).catch((err) => {
+                      console.error('Error mengirim pesan:', err);
+                      reply('Terjadi kesalahan saat mengirim pesan.');
+                  });
+                  });
+
+                    YD.on("error", function(error) {
+                        console.error("Error:", error);
+                        reply('Error downloading MP3');
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                reply('Terjadi kesalahan.');
+            }
+        });
+    }
+          break;
+
+          case 'playv3':
+case 'song': {
+    const ytdl = require('ytdl-core');
+    const fs = require('fs');
+
+    const keyword = args.join(' ');
+
+    reply('Mencari judul video...');
+
+    ytdl.getBasicInfo(keyword, (err, info) => {
+        if (err) {
+            console.error('Error searching video:', err);
+            return reply('Terjadi kesalahan saat mencari video.');
+        }
+        if (!info) {
+            return reply('Video tidak ditemukan.');
+        }
+
+        console.log('Video ditemukan:', info.title);
+        reply(`Judul video ditemukan: ${info.title}`);
+
+        try {
+            const { videoId, title, thumbnail } = info;
+
+            const fileName = `${title}.mp3`;
+            const filePath = `./mp3/${fileName}`;
+
+            if (fs.existsSync(filePath)) {
+                const audioBuffer = fs.readFileSync(filePath);
+
+                haikal.sendMessage(m.chat, {
+                    audio: audioBuffer,
+                    fileName: fileName,
+                    mimetype: 'audio/mp3',
+                    ptt: true,
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body: botname,
+                            mediaType: 2
+                        }
+                    }
+                }).catch((err) => {
+                    console.error('Error mengirim pesan:', err);
+                    reply('Terjadi kesalahan saat mengirim pesan.');
+                });
+            } else {
+                reply('Mendownload audio...');
+
+                const stream = ytdl(keyword, { filter: 'audioonly' });
+
+                const filePath = `./mp3/${title}.mp3`;
+                const writeStream = fs.createWriteStream(filePath);
+
+                stream.pipe(writeStream);
+
+                stream.on('progress', (chunkLength, downloaded, total) => {
+                    const percent = downloaded / total * 100;
+                    if (percent === 100) {
+                        reply('Download telah selesai.');
+                    } else {
+                        reply(`Download mencapai ${percent.toFixed(2)}%.`);
+                    }
+                });
+
+                writeStream.on('finish', () => {
+                    reply('Download telah selesai.');
+
+                    haikal.sendMessage(m.chat, {
+                        audio: fs.readFileSync(filePath),
+                        fileName: fileName,
+                        mimetype: 'audio/mp4',
+                        ptt: true,
+                        contextInfo: {
+                            externalAdReply: {
+                                title,
+                                body: botname,
+                                mediaType: 2,
+                                mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                                thumbnail: {
+                                    jpegThumbnail: thumbnail
+                                }
+                            }
+                        }
+                    }).catch((err) => {
+                        console.error('Error mengirim pesan:', err);
+                        reply('Terjadi kesalahan saat mengirim pesan.');
+                    });
+                });
+
+                writeStream.on('error', (err) => {
+                    console.error('Error writing file:', err);
+                    reply('Terjadi kesalahan saat menulis file.');
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            reply('Terjadi kesalahan.');
+        }
+    });
+}
+break;
+
+case 'playv6':
+case 'song': {
+    const ytdl = require('ytdl-core');
+    const fs = require('fs');
+
+    const keyword = args.join(' ');
+
+    reply('Mencari judul video...');
+
+    ytdl.getBasicInfo(keyword, (err, info) => {
+        if (err) {
+            console.error('Error searching video:', err);
+            return reply('Terjadi kesalahan saat mencari video.');
+        }
+        if (!info) {
+            return reply('Video tidak ditemukan.');
+        }
+
+        const video = info.videoDetails;
+        console.log('Video ditemukan:', video.title);
+        reply(`Judul video ditemukan: ${video.title}`);
+
+        try {
+            const { videoId, title, thumbnails } = video;
+
+            const fileName = `${title}.mp3`;
+            const filePath = `./mp3/${fileName}`;
+
+            if (fs.existsSync(filePath)) {
+                const audioBuffer = fs.readFileSync(filePath);
+
+                haikal.sendMessage(m.chat, {
+                    audio: audioBuffer,
+                    fileName: fileName,
+                    mimetype: 'audio/mp3',
+                    ptt: true,
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body: botname,
+                            mediaType: 2
+                        }
+                    }
+                }).catch((err) => {
+                    console.error('Error mengirim pesan:', err);
+                    reply('Terjadi kesalahan saat mengirim pesan.');
+                });
+            } else {
+                reply('Mendownload audio...');
+
+                const stream = ytdl(keyword, { filter: 'audioonly' });
+
+                const writeStream = fs.createWriteStream(filePath);
+
+                stream.pipe(writeStream);
+
+                stream.on('progress', (chunkLength, downloaded, total) => {
+                    const percent = downloaded / total * 100;
+                    if (percent === 100) {
+                        reply('Download telah selesai.');
+                    } else {
+                        reply(`Download mencapai ${percent.toFixed(2)}%.`);
+                    }
+                });
+
+                writeStream.on('finish', () => {
+                    reply('Download telah selesai.');
+
+                    haikal.sendMessage(m.chat, {
+                        audio: fs.readFileSync(filePath),
+                        fileName: fileName,
+                        mimetype: 'audio/mp4',
+                        ptt: true,
+                        contextInfo: {
+                            externalAdReply: {
+                                title,
+                                body: botname,
+                                mediaType: 2,
+                                mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                                thumbnail: {
+                                    jpegThumbnail: thumbnails[0].url
+                                }
+                            }
+                        }
+                    }).catch((err) => {
+                        console.error('Error mengirim pesan:', err);
+                        reply('Terjadi kesalahan saat mengirim pesan.');
+                    });
+                });
+
+                writeStream.on('error', (err) => {
+                    console.error('Error writing file:', err);
+                    reply('Terjadi kesalahan saat menulis file.');
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            reply('Terjadi kesalahan.');
+        }
+    });
+}
+break;
+
+case 'playv7':
+case 'song': {
+    const yts = require('yt-search');
+    const { exec } = require('youtube-dl-exec');
+    const fs = require('fs');
+
+    const keyword = args.join(' ');
+
+    reply('Mencari judul musik...');
+
+    yts(keyword, async (err, result) => {
+        if (err) {
+            console.error('Error searching music:', err);
+            return reply('Terjadi kesalahan saat mencari musik.');
+        }
+        if (!result || !result.videos || result.videos.length === 0) {
+            return reply('Musik tidak ditemukan.');
+        }
+
+        const video = result.videos[0];
+        console.log('Musik ditemukan:', video.title);
+        reply(`Judul musik ditemukan: ${video.title}`);
+
+        try {
+            const { videoId, title, thumbnail } = video;
+
+            const fileName = `${title}.mp3`;
+            const filePath = `./mp3/${fileName}`;
+
+            if (fs.existsSync(filePath)) {
+                const audioBuffer = fs.readFileSync(filePath);
+
+                haikal.sendMessage(m.chat, {
+                    audio: audioBuffer,
+                    fileName: fileName,
+                    mimetype: 'audio/mp3',
+                    ptt: true,
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body: botname,
+                            mediaType: 2
+                        }
+                    }
+                }).catch((err) => {
+                    console.error('Error mengirim pesan:', err);
+                    reply('Terjadi kesalahan saat mengirim pesan.');
+                });
+            } else {
+                reply('Mendownload audio...');
+
+                exec(`youtube-dl --extract-audio --audio-format mp3 --output "./mp3/${title}.%(ext)s" ${videoId}`)
+                    .then(() => {
+                        reply('Download telah selesai.');
+
+                        haikal.sendMessage(m.chat, {
+                            audio: fs.readFileSync(filePath),
+                            fileName: fileName,
+                            mimetype: 'audio/mp4',
+                            ptt: true,
+                            contextInfo: {
+                                externalAdReply: {
+                                    title,
+                                    body: botname,
+                                    mediaType: 2,
+                                    mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                                    thumbnail: {
+                                        jpegThumbnail: thumbnail
+                                    }
+                                }
+                            }
+                        }).catch((err) => {
+                            console.error('Error mengirim pesan:', err);
+                            reply('Terjadi kesalahan saat mengirim pesan.');
+                        });
+                    })
+                    .catch((err) => {
+                        console.error('Error downloading audio:', err);
+                        reply('Terjadi kesalahan saat mendownload audio.');
+                    });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            reply('Terjadi kesalahan.');
+        }
+    });
+}
+break;
+
+case 'playv8':
+case 'song': {
+    const yts = require('yt-search');
+    const youtubedl = require('youtube-dl-exec');
+    const fs = require('fs');
+
+    const keyword = args.join(' ');
+
+    reply('Mencari judul musik...');
+
+    yts(keyword, async (err, result) => {
+        if (err) {
+            console.error('Error searching music:', err);
+            return reply('Terjadi kesalahan saat mencari musik.');
+        }
+        if (!result || !result.videos || result.videos.length === 0) {
+            return reply('Musik tidak ditemukan.');
+        }
+
+        const video = result.videos[0];
+        console.log('Musik ditemukan:', video.title);
+        reply(`Judul musik ditemukan: ${video.title}`);
+
+        try {
+            const { videoId, title, thumbnail } = video;
+
+            const fileName = `${title}.mp3`;
+            const filePath = `./mp3/${fileName}`;
+
+            if (fs.existsSync(filePath)) {
+                const audioBuffer = fs.readFileSync(filePath);
+
+                haikal.sendMessage(m.chat, {
+                    audio: audioBuffer,
+                    fileName: fileName,
+                    mimetype: 'audio/mp3',
+                    ptt: true,
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body: botname,
+                            mediaType: 2
+                        }
+                    }
+                }).catch((err) => {
+                    console.error('Error mengirim pesan:', err);
+                    reply('Terjadi kesalahan saat mengirim pesan.');
+                });
+            } else {
+                reply('Mendownload audio...');
+
+                youtubedl(`https://www.youtube.com/watch?v=${videoId}`, {
+                    dumpSingleJson: true,
+                    noCheckCertificates: true,
+                    noWarnings: true,
+                    preferFreeFormats: true,
+                    addHeader: ['referer:youtube.com', 'user-agent:googlebot']
+                }).then(async (output) => {
+                    const audioUrl = output.formats.find(format => format.ext === 'mp3' && format.acodec === 'mp3');
+
+                    if (!audioUrl) {
+                        return reply('Tidak dapat menemukan format audio.');
+                    }
+
+                    const audioBuffer = await youtubedl(audioUrl.url);
+
+                    fs.writeFileSync(filePath, audioBuffer);
+
+                    reply('Download telah selesai.');
+
+                    haikal.sendMessage(m.chat, {
+                        audio: audioBuffer,
+                        fileName: fileName,
+                        mimetype: 'audio/mp3',
+                        ptt: true,
+                        contextInfo: {
+                            externalAdReply: {
+                                title,
+                                body: botname,
+                                mediaType: 2,
+                                mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                                thumbnail: {
+                                    jpegThumbnail: thumbnail
+                                }
+                            }
+                        }
+                    }).catch((err) => {
+                        console.error('Error mengirim pesan:', err);
+                        reply('Terjadi kesalahan saat mengirim pesan.');
+                    });
+                }).catch((err) => {
+                    console.error('Error downloading audio:', err);
+                    reply('Terjadi kesalahan saat mendownload audio.');
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            reply('Terjadi kesalahan.');
+        }
+    });
+}
+break;
+
+case 'playv9':
+case 'song': {
+    const yts = require('yt-search');
+    const youtubedl = require('youtube-dl-exec');
+    const fs = require('fs');
+    const ffmpeg = require('fluent-ffmpeg');
+
+    const keyword = args.join(' ');
+
+    reply('Mencari judul musik...');
+
+    yts(keyword, async (err, result) => {
+        if (err) {
+            console.error('Error searching music:', err);
+            return reply('Terjadi kesalahan saat mencari musik.');
+        }
+        if (!result || !result.videos || result.videos.length === 0) {
+            return reply('Musik tidak ditemukan.');
+        }
+
+        const video = result.videos[0];
+        console.log('Musik ditemukan:', video.title);
+        reply(`Judul musik ditemukan: ${video.title}`);
+
+        try {
+            const { videoId, title, thumbnail } = video;
+
+            const fileName = `${title}.mp3`;
+            const filePath = `./mp3/${fileName}`;
+
+            if (fs.existsSync(filePath)) {
+                const audioBuffer = fs.readFileSync(filePath);
+
+                haikal.sendMessage(m.chat, {
+                    audio: audioBuffer,
+                    fileName: fileName,
+                    mimetype: 'audio/mp3',
+                    ptt: true,
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body: botname,
+                            mediaType: 2
+                        }
+                    }
+                }).catch((err) => {
+                    console.error('Error mengirim pesan:', err);
+                    reply('Terjadi kesalahan saat mengirim pesan.');
+                });
+            } else {
+                reply('Mendownload audio...');
+
+                youtubedl(`https://www.youtube.com/watch?v=${videoId}`, {
+                    dumpSingleJson: true,
+                    noCheckCertificates: true,
+                    noWarnings: true,
+                    preferFreeFormats: true,
+                    addHeader: ['referer:youtube.com', 'user-agent:googlebot']
+                }).then(async () => {
+                    ffmpeg(`https://www.youtube.com/watch?v=${videoId}`)
+                        .toFormat('mp3')
+                        .on('error', (err) => {
+                            console.error('Error converting audio:', err);
+                            reply('Terjadi kesalahan saat mengonversi audio.');
+                        })
+                        .on('end', () => {
+                            reply('Download telah selesai.');
+
+                            const audioBuffer = fs.readFileSync(filePath);
+
+                            haikal.sendMessage(m.chat, {
+                                audio: audioBuffer,
+                                fileName: fileName,
+                                mimetype: 'audio/mp3',
+                                ptt: true,
+                                contextInfo: {
+                                    externalAdReply: {
+                                        title,
+                                        body: botname,
+                                        mediaType: 2,
+                                        mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                                        thumbnail: {
+                                            jpegThumbnail: thumbnail
+                                        }
+                                    }
+                                }
+                            }).catch((err) => {
+                                console.error('Error mengirim pesan:', err);
+                                reply('Terjadi kesalahan saat mengirim pesan.');
+                            });
+                        })
+                        .saveToFile(filePath);
+                }).catch((err) => {
+                    console.error('Error downloading audio:', err);
+                    reply('Terjadi kesalahan saat mendownload audio.');
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            reply('Terjadi kesalahan.');
+        }
+    });
+}
+break;
+
+case 'playv10':  case 'song': case 'ytmp3': {
+    if (!text) return reply(`Example : ${prefix + command} anime whatsapp status`)
+    const xeonplaymp3 = require('./lib/ytdl2')
+    const { fetchBuffer } = require("./lib/myfunc2")
+    let yts = require("youtube-yts")
+            let search = await yts(text)
+            let anup3k = search.videos[0]
+    const pl= await xeonplaymp3.mp3(anup3k.url)
+    await haikal.sendMessage(m.chat,{
+        audio: fs.readFileSync(pl.path),
+        fileName: anup3k.title + '.mp3',
+        mimetype: 'audio/mp4', ptt: true,
+        contextInfo:{
+            externalAdReply:{
+                title:anup3k.title,
+                body: botname,
+                thumbnail: await fetchBuffer(pl.meta.image),
+                mediaType:2,
+                mediaUrl:anup3k.url,
+            }
+    
+        },
+    },{quoted:m})
+    await fs.unlinkSync(pl.path)
+    }
+    break;
+
+    case 'playv11': {
+        const ytSearch = require('yt-search');
+        const { Downloader } = require('ytdl-mp3');
+    
+        // Fungsi untuk mencari judul lagu dan mengunduhnya
+        async function searchAndDownload(query) {
+            const result = await ytSearch(query);
+            const url = result.videos[0].url;
+            const title = result.videos[0].title;
+            const outputPath = __dirname + '/mp3';
+            const downloader = new Downloader({
+                outputPath: outputPath,
+            });
+            return await downloader.downloadSong(url, { title, format: 'mp3' });
+        }
+    
+        // Menggunakan fungsi untuk mencari judul lagu dan mengunduhnya
+        searchAndDownload('query').then(filePath => {
+            haikal.sendMessage(m.chat, {
+                audio: fs.readFileSync(filePath),
+                fileName: `${filePath.split('/').pop()}`,
+                mimetype: 'audio/mp4',
+                ptt: true,
+            }, { quoted: m }).then(() => {
+                console.log('File terkirim');
+            }).catch(err => {
+                console.error(err);
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv12': {
+        const fs = require('fs');
+        const youtubedl = require('youtube-dl-exec');
+        const ytSearch = require('yt-search');
+    
+        // Fungsi untuk mencari judul lagu dan mengunduhnya
+        async function searchAndDownload(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            const url = video.url;
+            const title = video.title;
+            const options = {
+                o: '-', // Output ke stdout
+                q: true, // Quiet mode (tidak menampilkan log)
+                f: 'bestaudio[ext=mp3]', // Format audio terbaik dalam format MP3
+            };
+            const buffer = await youtubedl(url, options);
+            return { buffer, title };
+        }
+    
+        // Menggunakan fungsi untuk mencari judul lagu dan mengunduhnya
+        searchAndDownload('query').then(({ buffer, title }) => {
+            const fileName = `${title.replace(/[^\w\s]/gi, '')}.mp3`; // Menghapus karakter khusus dari judul untuk nama file
+            const filePath = `./mp3/${fileName}`; // Path untuk menyimpan file dalam folder mp3
+            fs.writeFileSync(filePath, buffer); // Menyimpan file musik ke dalam folder mp3
+            haikal.sendMessage(m.chat, {
+                audio: buffer,
+                fileName: fileName,
+                mimetype: 'audio/mp3',
+                ptt: true,
+            }, { quoted: m }).then(() => {
+                console.log('File terkirim');
+            }).catch(err => {
+                console.error(err);
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv13': {
+        const fs = require('fs');
+        const youtubedl = require('youtube-dl-exec');
+        const ytSearch = require('yt-search');
+    
+        // Fungsi untuk mencari judul lagu dan mengunduhnya
+        async function searchAndDownload(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            const url = video.url;
+            const title = video.title;
+            const options = {
+                o: '-', // Output ke stdout
+                q: true, // Quiet mode (tidak menampilkan log)
+                f: 'bestaudio', // Format audio terbaik
+                r: '500K', // Batas bitrate untuk mengurangi ukuran file
+            };
+            return await youtubedl(url, options);
+        }
+    
+        // Menggunakan fungsi untuk mencari judul lagu dan mengunduhnya
+        searchAndDownload('query').then(buffer => {
+            const fileName = 'music.mp3'; // Nama file untuk file musik
+            const filePath = `./mp3/${fileName}`; // Path untuk menyimpan file dalam folder mp3
+            fs.writeFileSync(filePath, buffer); // Menyimpan file musik ke dalam folder mp3
+            haikal.sendMessage(m.chat, {
+                audio: buffer,
+                fileName: fileName,
+                mimetype: 'audio/mp3',
+                ptt: true,
+            }, { quoted: m }).then(() => {
+                console.log('File terkirim');
+            }).catch(err => {
+                console.error(err);
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv14': {
+        const fs = require('fs');
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+        const ffmpeg = require('fluent-ffmpeg');
+    
+        // Fungsi untuk mencari judul lagu dan mengunduhnya
+        async function searchAndDownload(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            const url = video.url;
+            const title = video.title;
+            const stream = ytdl(url, { filter: 'audioonly' });
+            return { stream, title };
+        }
+    
+        // Menggunakan fungsi untuk mencari judul lagu dan mengunduhnya
+        searchAndDownload('query').then(({ stream, title }) => {
+            const fileName = `${title.replace(/[^\w\s]/gi, '')}.mp3`; // Menghapus karakter khusus dari judul untuk nama file
+            const filePath = `./mp3/${fileName}`; // Path untuk menyimpan file dalam folder mp3
+            const outputStream = fs.createWriteStream(filePath); // Membuat write stream ke file
+            stream.pipe(outputStream); // Mengalirkan data stream ke file
+            outputStream.on('finish', () => {
+                ffmpeg(filePath)
+                    .toFormat('mp3')
+                    .on('end', () => {
+                        haikal.sendMessage(m.chat, {
+                            audio: fs.readFileSync(filePath),
+                            fileName: fileName,
+                            mimetype: 'audio/mp3',
+                            ptt: true,
+                        }, { quoted: m }).then(() => {
+                            console.log('File terkirim');
+                        }).catch(err => {
+                            console.error(err);
+                        });
+                    })
+                    .on('error', err => {
+                        console.error('Error during ffmpeg conversion:', err);
+                    })
+                    .save(`${filePath.split('.').slice(0, -1).join('.')}.mp3`); // Mengonversi file ke format MP3 menggunakan ffmpeg
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv15': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+    
+        // Fungsi untuk mencari judul lagu dan mengunduhnya
+        async function searchAndDownload(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            const url = video.url;
+            const title = video.title;
+            const stream = ytdl(url, { filter: 'audioonly' });
+            return { stream, title };
+        }
+    
+        // Menggunakan fungsi untuk mencari judul lagu dan mengunduhnya
+        searchAndDownload('query').then(({ stream, title }) => {
+            const fileName = `${title.replace(/[^\w\s]/gi, '')}.mp3`; // Menghapus karakter khusus dari judul untuk nama file
+            haikal.sendMessage(m.chat, {
+                audio: stream,
+                fileName: fileName,
+                mimetype: 'audio/mp4',
+                ptt: true,
+            }, { quoted: m }).then(() => {
+                console.log('File terkirim');
+            }).catch(err => {
+                console.error(err);
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv16': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+    
+        // Fungsi untuk mencari judul lagu dan mengunduhnya
+        async function searchAndDownload(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            const url = video.url;
+            const title = video.title;
+            const stream = ytdl(url, { filter: 'audioonly' });
+            return { stream, title };
+        }
+    
+        // Menggunakan fungsi untuk mencari judul lagu dan mengunduhnya
+        searchAndDownload('query').then(({ stream, title }) => {
+            const fileName = `${title.replace(/[^\w\s]/gi, '')}.mp3`; // Menghapus karakter khusus dari judul untuk nama file
+            let buffer = [];
+            stream.on('data', (chunk) => {
+                buffer.push(chunk);
+            });
+            stream.on('end', () => {
+                buffer = Buffer.concat(buffer);
+                haikal.sendMessage(m.chat, {
+                    audio: buffer,
+                    fileName: fileName,
+                    mimetype: 'audio/mp4',
+                    ptt: true,
+                }, { quoted: m }).then(() => {
+                    console.log('File terkirim');
+                }).catch(err => {
+                    console.error(err);
+                });
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv17': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+        const fs = require('fs');
+    
+        // Fungsi untuk mencari ID video dari judul
+        async function searchAndGetID(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            return video.videoId;
+        }
+    
+        // Menggunakan fungsi untuk mencari ID video dan mengunduhnya
+        searchAndGetID('query').then(videoId => {
+            const stream = ytdl(videoId, { filter: 'audioonly' }); // Mengunduh stream audio menggunakan ID video
+            const fileName = `${videoId}.mp3`; // Nama file MP3 menggunakan ID video
+            const filePath = `./mp3/${fileName}`; // Path untuk menyimpan file dalam folder mp3
+            const writeStream = fs.createWriteStream(filePath); // Membuat write stream ke file
+    
+            stream.pipe(writeStream); // Mengalirkan data stream ke file
+    
+            writeStream.on('finish', () => {
+                // Mengirim file sebagai pesan audio setelah selesai diunduh
+                haikal.sendMessage(m.chat, {
+                    audio: fs.readFileSync(filePath),
+                    fileName: fileName,
+                    mimetype: 'audio/mp4',
+                    ptt: true,
+                }, { quoted: m }).then(() => {
+                    console.log('File terkirim');
+                    // Menghapus file setelah dikirim
+                    fs.unlinkSync(filePath);
+                }).catch(err => {
+                    console.error(err);
+                });
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv18': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+        const fs = require('fs');
+    
+        // Fungsi untuk mencari ID video dari judul
+        async function searchAndGetID(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            return video.videoId;
+        }
+    
+        // Menggunakan fungsi untuk mencari ID video dan mengunduhnya
+        searchAndGetID('query').then(videoId => {
+            const stream = ytdl(videoId, { filter: 'audioonly' }); // Mengunduh stream audio menggunakan ID video
+            const fileName = `${videoId}.mp3`; // Nama file MP3 menggunakan ID video
+            const filePath = `./mp3/${fileName}`; // Path untuk menyimpan file dalam folder mp3
+            const writeStream = fs.createWriteStream(filePath); // Membuat write stream ke file
+    
+            // Menampilkan progress unduhan ke console log
+            ytdl.getInfo(videoId, (err, info) => {
+                if (err) {
+                    console.error('Error getting video info:', err);
+                    return;
+                }
+                const videoLength = info.length_seconds;
+                let downloadedBytes = 0;
+                stream.on('progress', (chunkLength, downloaded, total) => {
+                    downloadedBytes += chunkLength;
+                    const downloadedPercentage = (downloadedBytes / total) * 100;
+                    console.log(`Download progress: ${downloadedPercentage.toFixed(2)}%`);
+                });
+            });
+    
+            stream.pipe(writeStream); // Mengalirkan data stream ke file
+    
+            writeStream.on('finish', () => {
+                // Mengirim file sebagai pesan audio setelah selesai diunduh
+                haikal.sendMessage(m.chat, {
+                    audio: fs.readFileSync(filePath),
+                    fileName: fileName,
+                    mimetype: 'audio/mp4',
+                    ptt: true,
+                }, { quoted: m }).then(() => {
+                    console.log('File terkirim');
+                    // Menghapus file setelah dikirim
+                    fs.unlinkSync(filePath);
+                }).catch(err => {
+                    console.error(err);
+                });
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv19': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+        const fs = require('fs');
+    
+        // Fungsi untuk mencari URL video dari judul
+        async function searchAndGetURL(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            return video.url;
+        }
+    
+        // Menggunakan fungsi untuk mencari URL video dan mengunduhnya
+        searchAndGetURL('query').then(videoURL => {
+            const stream = ytdl(videoURL, { filter: 'audioonly' }); // Mengunduh stream audio menggunakan URL video
+            const fileName = `${videoURL.split('=')[1]}.mp3`; // Nama file MP3 menggunakan ID video
+            const filePath = `./Downloads/${fileName}`; // Path untuk menyimpan file dalam folder mp3
+            const writeStream = fs.createWriteStream(filePath); // Membuat write stream ke file
+    
+            // Menampilkan progress unduhan ke console log
+            ytdl.getInfo(videoURL, (err, info) => {
+                if (err) {
+                    console.error('Error getting video info:', err);
+                    return;
+                }
+                const videoLength = info.length_seconds;
+                let downloadedBytes = 0;
+                stream.on('progress', (chunkLength, downloaded, total) => {
+                    downloadedBytes += chunkLength;
+                    const downloadedPercentage = (downloadedBytes / total) * 100;
+                    console.log(`Download progress: ${downloadedPercentage.toFixed(2)}%`);
+                });
+            });
+    
+            stream.pipe(writeStream); // Mengalirkan data stream ke file
+    
+            writeStream.on('finish', () => {
+                // Mengirim file sebagai pesan audio setelah selesai diunduh
+                haikal.sendMessage(m.chat, {
+                    audio: fs.readFileSync(filePath),
+                    fileName: fileName,
+                    mimetype: 'audio/mp4',
+                    ptt: true,
+                }, { quoted: m }).then(() => {
+                    console.log('File terkirim');
+                    // Menghapus file setelah dikirim
+                    fs.unlinkSync(filePath);
+                }).catch(err => {
+                    console.error(err);
+                });
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv20': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+        const fs = require('fs');
+    
+        // Fungsi untuk mencari ID video dari judul
+        async function searchAndGetID(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            return video.videoId;
+        }
+    
+        // Menggunakan fungsi untuk mencari ID video dan mengunduhnya
+        searchAndGetID('query').then(videoId => {
+            const stream = ytdl(`https://www.youtube.com/watch?v=${videoId}`, { filter: 'audioonly' }); // Mengunduh stream audio menggunakan ID video
+    
+            // Membuat write stream ke file temporary
+            const filePath = `./mp3/${videoId}.mp3`;
+            const writeStream = fs.createWriteStream(filePath);
+            
+            stream.pipe(writeStream); // Mengalirkan data stream ke file
+    
+            writeStream.on('finish', () => {
+                // Mengirim file sebagai pesan audio setelah selesai diunduh
+                haikal.sendMessage(m.chat, {
+                    audio: fs.readFileSync(filePath),
+                    fileName: `${videoId}.mp3`,
+                    mimetype: 'audio/mp4',
+                    ptt: true,
+                }, { quoted: m }).then(() => {
+                    console.log('File terkirim');
+                    // Menghapus file setelah dikirim
+                    fs.unlinkSync(filePath);
+                }).catch(err => {
+                    console.error(err);
+                });
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv21': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+    
+        // Fungsi untuk mencari URL video dari judul
+        async function searchAndGetURL(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            return { url: video.url, title: video.title };
+        }
+    
+        // Menggunakan fungsi untuk mencari URL video dan mengunduhnya
+        searchAndGetURL('query').then(({ url, title }) => {
+            const stream = ytdl(url, { filter: 'audioonly' }); // Mengunduh stream audio menggunakan URL video
+            const fileName = `${title.replace(/[^\w\s]/gi, '')}.mp3`; // Nama file MP3
+    
+            // Mengirim audio stream sebagai pesan audio
+            haikal.sendMessage(m.chat, {
+                audio: stream,
+                fileName: fileName,
+                mimetype: 'audio/mp4',
+                ptt: true,
+            }, { quoted: m }).then(() => {
+                console.log('Audio terkirim');
+            }).catch(err => {
+                console.error(err);
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv22': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+    
+        // Fungsi untuk mencari URL video dari judul
+        async function searchAndGetURL(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            return { url: video.url, title: video.title };
+        }
+    
+        // Menggunakan fungsi untuk mencari URL video dan mengunduhnya
+        searchAndGetURL('query').then(({ url, title }) => {
+            const stream = ytdl(url, { filter: 'audioonly' }); // Mengunduh stream audio menggunakan URL video
+            const fileName = `${title}.mp3`; // Nama file MP3
+    
+            // Mengirim audio stream sebagai pesan audio
+            haikal.sendMessage(m.chat, {
+                audio: stream,
+                fileName: fileName,
+                mimetype: 'audio/mp4',
+                ptt: true,
+            }, { quoted: m }).then(() => {
+                console.log('Audio terkirim');
+            }).catch(err => {
+                console.error(err);
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+    case 'playv23': {
+        const ytdl = require('ytdl-core');
+        const ytSearch = require('yt-search');
+    
+        // Fungsi untuk mencari URL video dari judul
+        async function searchAndGetURL(query) {
+            const result = await ytSearch(query);
+            const video = result.videos[0];
+            return { url: video.url, title: video.title };
+        }
+    
+        // Menggunakan fungsi untuk mencari URL video dan mengunduhnya
+        searchAndGetURL('query').then(({ url, title }) => {
+            // Memastikan title adalah string
+            if (typeof title !== 'string') {
+                title = String(title);
+            }
+    
+            const stream = ytdl(url, { filter: 'audioonly' }); // Mengunduh stream audio menggunakan URL video
+            const fileName = `${title.replace(/[^\w\s]/gi, '')}.mp3`; // Nama file MP3
+    
+            // Mengirim audio stream sebagai pesan audio
+            haikal.sendMessage(m.chat, {
+                audio: stream,
+                fileName: fileName,
+                mimetype: 'audio/mp4',
+                ptt: true,
+            }, { quoted: m }).then(() => {
+                console.log('Audio terkirim');
+            }).catch(err => {
+                console.error(err);
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+    break;
+    
+case 'playv4':
+    case 'song': {
+        const ytdl = require('ytdl-core');
+        const yts = require('yt-search');
+        const fs = require('fs');
+    
+        const keyword = args.join(' ');
+    
+        reply('Mencari judul video...');
+    
+        yts({ videoId: keyword }, async (err, result) => {
+            if (err) {
+                console.error('Error searching video:', err);
+                return reply('Terjadi kesalahan saat mencari video.');
+            }
+            if (!result || !result.video) {
+                return reply('Video tidak ditemukan.');
+            }
+    
+            const video = result.video;
+            console.log('Video ditemukan:', video.title);
+            reply(`Judul video ditemukan: ${video.title}`);
+    
+            try {
+                const { videoId, title, thumbnail } = video;
+    
+                const fileName = `${title}.mp3`;
+                const filePath = `./mp3/${fileName}`;
+    
+                if (fs.existsSync(filePath)) {
+                    const audioBuffer = fs.readFileSync(filePath);
+    
+                    haikal.sendMessage(m.chat, {
+                        audio: audioBuffer,
+                        fileName: fileName,
+                        mimetype: 'audio/mp3',
+                        ptt: true,
+                        contextInfo: {
+                            externalAdReply: {
+                                title,
+                                body: botname,
+                                mediaType: 2
+                            }
+                        }
+                    }).catch((err) => {
+                        console.error('Error mengirim pesan:', err);
+                        reply('Terjadi kesalahan saat mengirim pesan.');
+                    });
+                } else {
+                    reply('Mendownload audio...');
+    
+                    const stream = ytdl(videoId, { filter: 'audioonly' });
+    
+                    const writeStream = fs.createWriteStream(filePath);
+    
+                    stream.pipe(writeStream);
+    
+                    stream.on('progress', (chunkLength, downloaded, total) => {
+                        const percent = downloaded / total * 100;
+                        if (percent === 100) {
+                            reply('Download telah selesai.');
+                        } else {
+                            reply(`Download mencapai ${percent.toFixed(2)}%.`);
+                        }
+                    });
+    
+                    writeStream.on('finish', () => {
+                        reply('Download telah selesai.');
+    
+                        haikal.sendMessage(m.chat, {
+                            audio: fs.readFileSync(filePath),
+                            fileName: fileName,
+                            mimetype: 'audio/mp4',
+                            ptt: true,
+                            contextInfo: {
+                                externalAdReply: {
+                                    title,
+                                    body: botname,
+                                    mediaType: 2,
+                                    mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                                    thumbnail: {
+                                        jpegThumbnail: thumbnail
+                                    }
+                                }
+                            }
+                        }).catch((err) => {
+                            console.error('Error mengirim pesan:', err);
+                            reply('Terjadi kesalahan saat mengirim pesan.');
+                        });
+                    });
+    
+                    writeStream.on('error', (err) => {
+                        console.error('Error writing file:', err);
+                        reply('Terjadi kesalahan saat menulis file.');
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                reply('Terjadi kesalahan.');
+            }
+        });
+    }
+    break;
+    
+    case 'playv5':
+case 'song': {
+    const ytdl = require('ytdl-core');
+    const yts = require('yt-search');
+    const fs = require('fs');
+
+    const keyword = args.join(' ');
+
+    reply('Mencari judul video...');
+
+    function searchAndDownloadWithRetry(attempts) {
+        yts({ videoId: keyword }, async (err, result) => {
+            if (err) {
+                console.error('Error searching video:', err);
+                return reply('Terjadi kesalahan saat mencari video.');
+            }
+            if (!result || !result.video) {
+                return reply('Video tidak ditemukan.');
+            }
+
+            const video = result.video;
+            console.log('Video ditemukan:', video.title);
+            reply(`Judul video ditemukan: ${video.title}`);
+
+            try {
+                const { videoId, title, thumbnail } = video;
+
+                const fileName = `${title}.mp3`;
+                const filePath = `./mp3/${fileName}`;
+
+                if (fs.existsSync(filePath)) {
+                    const audioBuffer = fs.readFileSync(filePath);
+
+                    haikal.sendMessage(m.chat, {
+                        audio: audioBuffer,
+                        fileName: fileName,
+                        mimetype: 'audio/mp3',
+                        ptt: true,
+                        contextInfo: {
+                            externalAdReply: {
+                                title,
+                                body: botname,
+                                mediaType: 2
+                            }
+                        }
+                    }).catch((err) => {
+                        console.error('Error mengirim pesan:', err);
+                        reply('Terjadi kesalahan saat mengirim pesan.');
+                    });
+                } else {
+                    reply('Mendownload audio...');
+
+                    const stream = ytdl(videoId, { filter: 'audioonly' });
+
+                    const writeStream = fs.createWriteStream(filePath);
+
+                    stream.pipe(writeStream);
+
+                    stream.on('progress', (chunkLength, downloaded, total) => {
+                        const percent = downloaded / total * 100;
+                        if (percent === 100) {
+                            reply('Download telah selesai.');
+                        } else {
+                            reply(`Download mencapai ${percent.toFixed(2)}%.`);
+                        }
+                    });
+
+                    writeStream.on('finish', () => {
+                        reply('Download telah selesai.');
+
+                        haikal.sendMessage(m.chat, {
+                            audio: fs.readFileSync(filePath),
+                            fileName: fileName,
+                            mimetype: 'audio/mp4',
+                            ptt: true,
+                            contextInfo: {
+                                externalAdReply: {
+                                    title,
+                                    body: botname,
+                                    mediaType: 2,
+                                    mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                                    thumbnail: {
+                                        jpegThumbnail: thumbnail
+                                    }
+                                }
+                            }
+                        }).catch((err) => {
+                            console.error('Error mengirim pesan:', err);
+                            reply('Terjadi kesalahan saat mengirim pesan.');
+                        });
+                    });
+
+                    writeStream.on('error', (err) => {
+                        console.error('Error writing file:', err);
+                        reply('Terjadi kesalahan saat menulis file.');
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                reply('Terjadi kesalahan.');
+            }
+        });
+    }
+
+    function retrySearchAndDownload(attemptsLeft) {
+        if (attemptsLeft === 0) {
+            return reply('Gagal mencari video setelah beberapa percobaan.');
+        }
+
+        const delay = Math.pow(2, attemptsLeft) * 1000; // Exponential backoff
+        setTimeout(() => {
+            searchAndDownloadWithRetry(attemptsLeft);
+        }, delay);
+    }
+
+    const maxAttempts = 5; // Maximum number of retry attempts
+    retrySearchAndDownload(maxAttempts);
+}
+break;
+
+          case 'playv2':
+          case 'songv2': {
+const ytSearch = require('yt-search');
+const FYD = require('youtube-mp3-downloader');
+const fs = require('fs');
+const path = require('path');
+
+const keyword = args.join(' ');
+const outputPath = path.join(__dirname, 'mp3');
+
+reply('Sedang Mencari Lagu Yang Anda Masukan...');
+
+ytSearch(keyword, async (err, result) => {
+    if (err) {
+        console.error('Tidak Bisa Mencari Lagu :', err);
+        return reply('Error Tidak Bisa Mencari Lagu.');
+    }
+
+    if (!result || !result.videos || result.videos.length === 0) {
+        return reply('Lagu Tidak Ada.');
+    }
+
+    const video = result.videos[0];
+    console.log('Lagu Ditemukan:', video.title);
+    reply(`Video title found: ${video.title}`);
+
+    try {
+        const { videoId, title, thumbnail } = video;
+        const fileName = `${title}.mp3`;
+        const filePath = path.join(outputPath, fileName);
+
+        if (fs.existsSync(filePath)) {
+            const audioBuffer = fs.readFileSync(filePath);
+
+            haikal.sendMessage(m.chat, {
+                audio: audioBuffer,
+                fileName: fileName,
+                mimetype: 'audio/mpeg',
+                ptt: true,
+                contextInfo: {
+                    externalAdReply: {
+                        title,
+                        body: botname,
+                        mediaType: 2,
+                    },
+                },
+            }).catch((err) => {
+                console.error('Eror Saat mengirim pesan:', err);
+                reply('Error Saat Mengirim Lagu.');
+            });
+
+            return;
+        }
+
+        const downloader = new FYD(videoId);
+
+        downloader.on('progress', (progress) => {
+            console.log('Progress:', progress);
+        });
+
+        downloader.on('end', (err, data) => {
+            if (err) {
+                console.error('Error saat mendownload MP3:', err);
+                reply('Error saat mendownload MP3.');
+                return;
+            }
+
+            const audioBuffer = fs.readFileSync(data.file);
+
+            haikal.sendMessage(m.chat, {
+                audio: audioBuffer,
+                fileName: fileName,
+                mimetype: 'audio/mpeg',
+                ptt: true,
+                contextInfo: {
+                    externalAdReply: {
+                        title,
+                        body: botname,
+                        mediaType: 2,
+                        mediaUrl: `https://youtube.com/watch?v=${videoId}`,
+                        thumbnail: {
+                            jpegThumbnail: thumbnail,
+                        },
+                    },
+                },
+            }).catch((err) => {
+                console.error('Error Mengirim Pesan:', err);
+                reply('Error Mengirim Lagu.');
+            });
+        });
+
+        downloader();
+    } catch (error) {
+        console.error('Error:', error);
+        reply('Error Saat Mendownload Lagu.');
+    }
+});
+          }
+          break;
+
           case 'wl': {
               const sftpConfig = JSON.parse(fs.readFileSync('sftp-config.json', 'utf8'));
               const wlGroup = sftpConfig.wlgrup;
@@ -756,12 +2270,17 @@ ${uptimeText}
                   return reply('Nama yang Anda masukkan mengandung kata-kata terlarang.');
               }
 
-              const wlFilePath = `scriptfiles/whitelist/${nama}.txt`;
+              const wlFilePath = `${global.sftppath}${nama}.txt`;
 
               try {
                   const sftp = new SftpClient(); // Inisialisasi objek SFTP
 
-                  await sftp.connect(sftpConfig);
+                  await sftp.connect({
+                    host: `${global.host}`,
+                    port: `${global.port}`,
+                    username: `${global.username}`,
+                    password: `${global.password}`
+                });
 
                   // Membuat file whitelist jika belum ada
                   await sftp.put(Buffer.from(''), wlFilePath, { mode: 0o644 });
@@ -776,15 +2295,15 @@ ${uptimeText}
                   fs.writeFileSync('database.json', JSON.stringify(database, null, 2));
 
                   reply(`
-*Dear Warga ALRP !*
+*Dear Warga ${global.NameServerLite} !*
  
 *Pendaftaran Nama anda berhasil didaftarkan! harap gunakan nama karakter anda dibawah ini untuk Registrasi pada InGame.*
  
 *Nama: ${nama}*
  
-*IP:* IPLU
+*IP:* ${global.IpServer}:${global.PortServer}
  
-*©2024© Alveolus Roleplay*`);
+*©2024© ${global.NameServerFull}*`);
               } catch (error) {
                   console.error(error);
                   reply('Terjadi kesalahan saat menambahkan nama dan nomor telepon ke whitelist.');
@@ -824,9 +2343,14 @@ ${uptimeText}
               try {
                   const sftp = new SftpClient(); // Inisialisasi objek SFTP
 
-                  await sftp.connect(sftpConfig);
+                  await sftp.connect({
+                    host: `${global.host}`,
+                    port: `${global.port}`,
+                    username: `${global.username}`,
+                    password: `${global.password}`
+                });
 
-                  const wlFilePath = `scriptfiles/whitelist/${nama}.txt`;
+                  const wlFilePath = `${global.sftppath}${nama}.txt`;
                   await sftp.delete(wlFilePath); // Menghapus file whitelist dengan nama yang diberikan
 
                   await sftp.end();
@@ -874,7 +2398,7 @@ ${uptimeText}
           break;
 
           case 'server': {
-              let sampApiUrl = `https://pablonetwork.cyclic.app/API/samp?key=pablo&host=104.167.222.158&port=3835`
+              let sampApiUrl = `https://pablonetwork.cyclic.app/API/samp?key=pablo&host=${global.IpServer}&port=${global.PortServer}`
 
               try {
                   let response = await axios(sampApiUrl)
@@ -939,7 +2463,7 @@ ${uptimeText}
           break;
 
           case 'player': {
-              let sampApiUrl = `https://pablonetwork.cyclic.app/API/samp?key=pablo&host=104.167.222.158&port=3835`
+              let sampApiUrl = `https://pablonetwork.cyclic.app/API/samp?key=pablo&host=${global.IpServer}&port=${global.PortServer}`
 
               try {
                   let response = await axios(sampApiUrl)
@@ -986,7 +2510,7 @@ ${uptimeText}
           break;
 
           case 'status': {
-              let sampApiUrl = `https://pablonetwork.cyclic.app/API/samp?key=pablo&host=104.167.222.158&port=3835`
+              let sampApiUrl = `https://pablonetwork.cyclic.app/API/samp?key=pablo&host=${global.IpServer}&port=${global.PortServer}`
 
               try {
                   let response = await axios(sampApiUrl)
@@ -1022,12 +2546,106 @@ ${uptimeText}
 
           case 'ip': {
               let IpMessage= `
-> 104.167.222.158:3835
+> ${global.IpServer}:${global.PortServer}
               `;
 
               reply(IpMessage);
           }
           break;
+
+          case 'test': {
+            reply(`${global.NameServerLite}`)
+            reply(`${global.NameServerFull}`)
+          }
+          break;
+
+// NSFW AREA
+// ===========================================================================================================================================================
+          case 'nsfwmenu': {
+            const mode = haikal.public ? 'Public' : 'Self';
+            const uptime = process.uptime();
+            const uptimeText = `${Math.floor(uptime / 3600)} jam, ${Math.floor((uptime % 3600) / 60)} menit, ${Math.floor(uptime % 60)} detik`;
+
+        reply(`
+╭───「 *𝙸𝙽𝙵𝙾 𝙱𝙾𝚃* 」─────ఌ︎
+├──────────────────ఌ︎
+│ *𝙽𝙰𝙼𝙰 𝙱𝙾𝚃* : PabloNetwork
+│ *𝙽𝙰𝙼𝙰 𝙳𝙴𝚅 𝙱𝙾𝚃* : Zyrex
+│ *𝙾𝚆𝙽𝙴𝚁* : wa.me/62857552519341
+│ *𝙳𝙴𝚅* : wa.me/6283146971961
+│ *𝚄𝙿𝚃𝙸𝙼𝙴* : ${uptimeText}
+│ *𝙼𝙾𝙳𝙴* : ${mode}
+│ *𝚃𝚈𝙿𝙴* : NodeJs
+│ *𝚄𝙿𝙳𝙰𝚃𝙴* : V3✔︎
+├──────────────────ఌ︎
+╰─── 『 *PabloNetwork∘₊✧*』 ────ఌ︎
+
+『 *ALL MENU∘₊✧*』
+
+╔━═━≫
+║⫸ ➪ trap
+║⫸ ➪ hneko
+║⫸ ➪ nwaifu
+║⫸ ➪ gasm
+║⫸ ➪ animespank
+║⫸ ➪ 
+║⫸ ➪ 
+║⫸ ➪ 
+║⫸ ➪ 
+║⫸ ➪ 
+║⫸ ➪ 
+║⫸ ➪ 
+║⫸ ➪ 
+║⫸ ➪ 
+║⫸ ➪ 
+╚━═━≫
+               `);
+        const pl = 'music.mp3'; 
+        haikal.sendMessage(m.chat, {
+            audio: fs.readFileSync(pl),
+            fileName: 'music.mp3',
+            mimetype: 'audio/mp4',
+            ptt: true,
+        }, { quoted: m }).then(() => {
+            console.log('File terkirim');
+        }).catch(err => {
+            console.error(err);
+        });
+          }
+          break;
+
+case 'trap' :
+
+ waifudd = await axios.get(`https://waifu.pics/api/nsfw/${command}`)       
+haikal.sendMessage(m.chat, { caption: mess.success, image: { url:waifudd.data.url } }, { quoted: m })
+break
+case 'hentai-neko' :
+case 'hneko' :
+
+    waifudd = await axios.get(`https://waifu.pics/api/nsfw/neko`)
+haikal.sendMessage(m.chat, { caption: mess.success, image: { url:waifudd.data.url } }, { quoted: m })
+break
+case 'hentai-waifu' :
+case 'nwaifu' :
+
+    waifudd = await axios.get(`https://waifu.pics/api/nsfw/waifu`)         
+haikal.sendMessage(m.chat, { caption: mess.success, image: { url:waifudd.data.url } }, { quoted: m })
+break
+case 'gasm':
+					
+ waifudd = await axios.get(`https://nekos.life/api/v2/img/${command}`)
+haikal.sendMessage(m.chat, { caption: mess.success, image: { url:waifudd.data.url } }, { quoted: m })
+break
+case 'animespank':
+
+ waifudd = await axios.get(`https://nekos.life/api/v2/img/spank`)     
+            await haikal.sendMessage(m.chat, { caption:  `Here you go!`, image: {url:waifudd.data.url} },{ quoted:m }).catch(err => {
+                    return('Error!')
+                })
+break
+          // BATAS NSFW AREA
+          // ===========================================================================================================================================================
+
           // BATAS SUCI
           // ===========================================================================================================================================================
 default:

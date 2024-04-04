@@ -1,13 +1,27 @@
-/* SC IKYYOFC V8
-BASE : HW MODS
-RECODE : IKYYOFC
-CREACOT : IKYYOFC
+/* SC BOT WL
+BASE : PABLO NETWORK
+RECODE : PABLO X ZYREX
+CREACOT : PABLO X ZYREX
 */
 
 const fs = require('fs')
 const chalk = require('chalk')
 
-global.owner = "6282136536302"
+//—————「 Set Host Untuk Koneksi ke Server WL 」—————//
+global.host = 'theta.optiklink.com' // HOST SFTP
+global.port = '2022' // PORT SFTP
+global.username = '9l7s1swp.860e41b8' //USERNAME SFTP
+global.password = 'ZfgPMIM1zgnw' //PASSWORD SFTP
+global.sftppath = '/scriptfiles/whitelist/' //UBAH MENJADI PATH TEMPAT FILE WHITELIST KALIAN BERADA
+
+//—————「 Setting Samp Query 」—————//
+global.IpServer = '104.167.222.158' //UBAH MENJADI IP SERVER KALIAN
+global.PortServer = '3835' // UBAH MENJADI PORT SERVER KALIAN
+global.NameServerLite = 'ALRP' // UBAH MENJADI NAMA SINGKATAN SERVER RP KALIAN CONTOH ALVEOULUS ROLEPLAY JADI ALRP
+global.NameServerFull = 'Alveolus Roleplay' // UBAH MENJADI NAMA SERVER KALIAN
+
+//—————「 Setting Bot 」—————//
+global.owner = "6285755251934"
 global.namabot = "PabloNetwork"
 global.botname = "PabloNetwork"
 global.autoJoin = false
@@ -20,18 +34,21 @@ global.tekspushkonv2 = ""
 global.packname = ""
 global.author = "Sticker By Pablo🥵"
 
+//—————「 Setting Nama Store 」—————//
 global.namastore = "PabloNetwork"
 global.nodana = "085755251934"
 global.nogopay = "-"
 global.shopepay = "limit"
 global.qris = "-"
 
+//—————「 Setting Create Panel 」—————//
 global.domain = '' // Isi Domain Lu
 global.apikey = '' // Isi Apikey Plta Lu
 global.capikey = '' // Isi Apikey Pltc Lu
 global.eggsnya = '15' // id eggs yang dipakai
 global.location = '1' // id location
 
+//—————「 Setting Anti Link 」—————//
 global.antilink = false
 
 const mess = {
